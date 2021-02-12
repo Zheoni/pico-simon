@@ -54,6 +54,7 @@ static note VICTORY_SEQUENCE[] = {
     { 660   ,   150 },
     { 0     ,   20  },
     { 880   ,   400 },
+    BUZZER_END_SEQUENCE
 };
 
 static note LOOSE_SEQUENCE[] = {
@@ -61,16 +62,14 @@ static note LOOSE_SEQUENCE[] = {
     { 0     ,   20   },
     { 138   ,   300  },
     { 110   ,   1200 },
+    BUZZER_END_SEQUENCE
 };
 
 static note READY_SEQUENCE[] = {
     { 1760  ,   100 },
+    BUZZER_END_SEQUENCE
 };
 // END OF CONFIGURATION
-
-static const uint VS_N = sizeof VICTORY_SEQUENCE / sizeof VICTORY_SEQUENCE[0];
-static const uint LS_N = sizeof LOOSE_SEQUENCE / sizeof LOOSE_SEQUENCE[0];
-static const uint RS_N = sizeof READY_SEQUENCE / sizeof READY_SEQUENCE[0];
 
 static led LEDS[N];
 static button BUTTONS[N];
@@ -96,17 +95,9 @@ static void setup() {
         COLOR_SOUNDS[i] = buzzer_calc_sound(COLOR_SOUNDS[i]);
     }
 
-    for (uint i = 0; i < VS_N; ++i) {
-        VICTORY_SEQUENCE[i].s = buzzer_calc_sound(VICTORY_SEQUENCE[i].s);
-    }
-
-    for (uint i = 0; i < LS_N; ++i) {
-        LOOSE_SEQUENCE[i].s = buzzer_calc_sound(LOOSE_SEQUENCE[i].s);
-    }
-
-    for (uint i = 0; i < RS_N; ++i) {
-        READY_SEQUENCE[i].s = buzzer_calc_sound(READY_SEQUENCE[i].s);
-    }
+    buzzer_calc_sound_sequence(VICTORY_SEQUENCE, VICTORY_SEQUENCE);
+    buzzer_calc_sound_sequence(LOOSE_SEQUENCE, LOOSE_SEQUENCE);
+    buzzer_calc_sound_sequence(READY_SEQUENCE, READY_SEQUENCE);
 
     // Set a random seed
     uint32_t random = 0;
@@ -132,38 +123,40 @@ static void start_sequence() {
 static void overflow_sequence() {
     led_enable_pwm(&LEDS[0]);
     led_start_pulsating(&LEDS[0], 1);
-    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE, VS_N);
-    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE, VS_N);
-    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE, VS_N);
+    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE);
+    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE);
+    buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE);
     led_stop_pulsating(&LEDS[0]);
     led_disable_pwm(&LEDS[0]);
 }
 
 static void victory_sequence(bool sound, bool leds) {
     if (sound)
-        buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE, VS_N);
+        buzzer_play_sound_sequence(BUZZER_PIN, VICTORY_SEQUENCE);
 }
 
 static void loose_sequence(bool sound, bool leds) {
+    if (sound)
+        buzzer_play_sound_sequence_non_blocking(BUZZER_PIN, LOOSE_SEQUENCE);
     if (leds) {
         for (int k = 0; k < 12; ++k) {
             for (int i = 0; i < N; ++i)
-                led_put(&LEDS[i], k % 2);
+                led_put(&LEDS[i], k % 2 == 0);
             sleep_ms(50);
         }
     }
-    if (sound)
-        buzzer_play_sound_sequence(BUZZER_PIN, LOOSE_SEQUENCE, LS_N);
+    buzzer_block_until_sequences_finish();
 }
 
 static void ready_sequence(bool sound, bool leds) {
+    if (sound)
+        buzzer_play_sound_sequence_non_blocking(BUZZER_PIN, READY_SEQUENCE);
     if (leds) {
         for (int i = 0; i < N; ++i) led_on(&LEDS[i]);
         sleep_ms(75);
         for (int i = 0; i < N; ++i) led_off(&LEDS[i]);
     }
-    if (sound)
-        buzzer_play_sound_sequence(BUZZER_PIN, READY_SEQUENCE, RS_N);
+    buzzer_block_until_sequences_finish();
 }
 
 
@@ -192,15 +185,18 @@ static void settings_adjust(game_settings_t* s) {
     bool exit = false;
     uint16_t current_bit;
     uint button;
+    const uint32_t timeout_ms = 20000;
     while (!exit) {
-        button = wait_button_push_detailed(0b11, 0, 1, LEDS, BUTTONS, N);
+        button = wait_button_push_detailed(0b11, 0, 1, LEDS, BUTTONS, N, timeout_ms);
         switch (button) {
             case 0:
             // set difficulty
             current_bit = (1 << s->difficulty);
-            button = wait_button_push_detailed(0b111 ^ current_bit, current_bit, 1, LEDS, BUTTONS, N);
+            button = wait_button_push_detailed(0b111 ^ current_bit, current_bit, 1, LEDS, BUTTONS, N, timeout_ms);
             if (button <= HARD) {
                 s->difficulty = button;
+            } else if (button == N) {
+                exit = true;
             }
             break;
 
@@ -213,26 +209,28 @@ static void settings_adjust(game_settings_t* s) {
             } else {
                 current_bit = 0b100;
             }
-            button = wait_button_push_detailed(0b111 ^ current_bit, current_bit, 1, LEDS, BUTTONS, N);
-            if (button < 3) {
-                switch (button) {
-                    case 0:
-                    s->sound_enabled = true;
-                    s->leds_enabled = true;
-                    break;
-                    case 1:
-                    s->leds_enabled = true;
-                    s->sound_enabled = false;
-                    break;
-                    case 2:
-                    s->leds_enabled = false;
-                    s->sound_enabled = true;
-                    break;
-                }
+            button = wait_button_push_detailed(0b111 ^ current_bit, current_bit, 1, LEDS, BUTTONS, N, timeout_ms);
+            switch (button) {
+                case 0:
+                s->sound_enabled = true;
+                s->leds_enabled = true;
+                break;
+                case 1:
+                s->leds_enabled = true;
+                s->sound_enabled = false;
+                break;
+                case 2:
+                s->leds_enabled = false;
+                s->sound_enabled = true;
+                break;
+                case N:
+                exit = true;
+                break;
             }
             break;
 
             default:
+            case N:
             exit = true;
             break;
         }
@@ -510,6 +508,19 @@ int main() {
     uint32_t pressed_button;
     while (1) {
         pressed_button = wait_button_push(LEDS, BUTTONS, N);
+        if (pressed_button == N) {
+            // timeout, enter low power mode
+
+            // TODO: low power mode is unstable in SDK, just busy until thats
+            // stable
+            int b = 0;
+            while (1) {
+                if (button_get(&BUTTONS[b])) break;
+                sleep_ms(5);
+                if (++b == N) b = 0;
+            }
+            continue;
+        }
         sleep_ms(100);
         switch (pressed_button) {
             default:

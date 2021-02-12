@@ -29,6 +29,10 @@ inline void button_set_debounce_time(button* b, uint32_t ms) {
     b->debounce_time = ms * 1000;
 }
 
+bool button_get(button* b);
+
+bool button_prepare_for_loop(button* b);
+
 button_change_t button_change_steady(button* b);
 
 #endif /* end of include guard: BUTTON_H */

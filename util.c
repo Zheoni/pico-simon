@@ -1,6 +1,7 @@
 #include "util.h"
+#include "pico/time.h"
 
-uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_mask, uint32_t delay_ms, led* leds, button* buttons, uint n) {
+uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_mask, uint32_t delay_ms, led* leds, button* buttons, uint n, uint32_t timeout_ms) {
     uint16_t led_bit;
     for (int i = 0; i < n; ++i) {
         led_bit = (1 << i);
@@ -12,18 +13,24 @@ uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_ma
         } else {
             led_off(&leds[i]);
         }
+        button_prepare_for_loop(&buttons[i]);
     }
 
-    bool pressed = false;
+    absolute_time_t absolute_timeout = make_timeout_time_ms(timeout_ms);
+    bool exit = false;
     uint pressed_button;
 
-    while (!pressed) {
+    while (!exit) {
         for (uint i = 0; i < n; ++i) {
             if (button_change_steady(&buttons[i]) == BUTTON_PRESS) {
-                pressed = true;
+                exit = true;
                 pressed_button = i;
                 break;
             }
+        }
+        if (timeout_ms != 0 && time_reached(absolute_timeout)) {
+            exit = true;
+            pressed_button = n;
         }
     }
 
@@ -40,5 +47,5 @@ uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_ma
 }
 
 uint wait_button_push(led* leds, button* buttons, uint n) {
-    return wait_button_push_detailed(0, 0xffff, 3, leds, buttons, n);
+    return wait_button_push_detailed(0, 0xffff, 3, leds, buttons, n, 120000);
 }

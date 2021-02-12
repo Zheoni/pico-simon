@@ -8,11 +8,18 @@ void button_init(uint button_pin, enum button_pull pull, bool pressed_state, but
     gpio_set_pulls(button_pin, pull == BUTTON_PULL_UP, pull == BUTTON_PULL_DOWN);
 
     b->pressed_state = pressed_state;
+    button_prepare_for_loop(b);
+    b->debounce_time = 20000;
+}
 
-    b->last_state = gpio_get(button_pin);
+bool button_get(button* b) {
+    return gpio_get(b->pin);
+}
+
+bool button_prepare_for_loop(button* b) {
+    b->last_state = gpio_get(b->pin);
     b->last_flicker = b->last_state;
     b->timestamp = get_absolute_time();
-    b->debounce_time = 20000;
 }
 
 button_change_t button_change_steady(button* b) {

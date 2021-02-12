@@ -2,7 +2,9 @@
 #include "hardware/clocks.h"
 #include "hardware/pwm.h"
 #include "hardware/gpio.h"
+#include "hardware/sync.h"
 #include "pico/time.h"
+#include <stdlib.h>
 
 #define TOP_MAX 65534
 /**
@@ -89,10 +91,82 @@ void buzzer_stop_sound(uint buzzer_pin) {
     pwm_set_enabled(slice_num, 0);
 }
 
-void buzzer_play_sound_sequence(uint buzzer_pin, note* notes, uint n) {
-    for (uint i = 0; i < n; ++i) {
-        buzzer_play_sound(buzzer_pin, notes[i].s);
-        sleep_ms(notes[i].d);
-        buzzer_stop_sound(buzzer_pin);
+inline static bool not_end(note n) {
+    return n.s != 0 || n.d != 0;
+}
+
+void buzzer_calc_sound_sequence(note* notes_src, note* notes_dest) {
+    uint current = 0;
+    while (not_end(notes_src[current])) {
+        notes_dest[current].d = notes_src[current].d;
+        notes_dest[current].s = buzzer_calc_sound(notes_src[current].s);
+        ++current;
     }
+    notes_dest[current].d = 0;
+    notes_dest[current].s = 0;
+}
+
+void buzzer_play_sound_sequence(uint buzzer_pin, note* notes) {
+    uint current = 0;
+    while (not_end(notes[current])) {
+        buzzer_play_sound(buzzer_pin, notes[current].s);
+        sleep_ms(notes[current].d);
+        buzzer_stop_sound(buzzer_pin);
+        ++current;
+    }
+}
+
+struct non_blocking_seq {
+    uint buzzer_pin;
+    uint current;
+    note* notes;
+};
+
+static volatile uint running_non_blocking_sequences = 0;
+
+static int64_t _buzzer_non_blocking_callback(alarm_id_t id, void* user_data) {
+    struct non_blocking_seq* call = (struct non_blocking_seq*) user_data;
+
+    buzzer_stop_sound(call->buzzer_pin);
+    call->current += 1;
+
+    if (not_end(call->notes[call->current])) {
+        buzzer_play_sound(call->buzzer_pin, call->notes[call->current].s);
+        return - ((int64_t) call->notes[call->current].d) * 1000;
+    } else {
+        free(call);
+        uint32_t state = save_and_disable_interrupts();
+        --running_non_blocking_sequences;
+        restore_interrupts(state);
+        return 0;
+    }
+}
+
+bool buzzer_play_sound_sequence_non_blocking(uint buzzer_pin, note* notes) {
+    if (not_end(notes[0])) {
+        struct non_blocking_seq* call = (struct non_blocking_seq*) malloc(sizeof(struct non_blocking_seq));
+        call->buzzer_pin = buzzer_pin;
+        call->current = 0;
+        call->notes = notes;
+        if (call == NULL) return false;
+
+        uint32_t state = save_and_disable_interrupts();
+        ++running_non_blocking_sequences;
+        restore_interrupts(state);
+
+        buzzer_play_sound(buzzer_pin, notes[0].s);
+        if (add_alarm_in_ms(notes[0].d, _buzzer_non_blocking_callback, call, true) == -1) {
+            free(call);
+            uint32_t state = save_and_disable_interrupts();
+            --running_non_blocking_sequences;
+            restore_interrupts(state);
+            return false;
+        }
+    }
+    return true;
+}
+
+void buzzer_block_until_sequences_finish() {
+    // dont need to worry about interruptions because the read is atomic
+    while (running_non_blocking_sequences > 0);
 }
