@@ -1,7 +1,7 @@
 # Pico Simon
 
-A (Simon Game)[https://en.wikipedia.org/wiki/Simon_(game)] implementation
-for the (Raspberry Pi Pico)[https://www.raspberrypi.org/products/raspberry-pi-pico/].
+A [Simon Game](https://en.wikipedia.org/wiki/Simon_(game)) implementation
+for the [Raspberry Pi Pico](https://www.raspberrypi.org/products/raspberry-pi-pico/).
 
 ## Features
 - Includes 3 games:
@@ -14,7 +14,7 @@ for the (Raspberry Pi Pico)[https://www.raspberrypi.org/products/raspberry-pi-pi
     - playing only with lights, only with sound or with both.
 
 ## To compile
-There is a `CMakeLists.txt` file inside the `src` directory. You should also have (set up the pico C SDK)[https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf].
+There is a `CMakeLists.txt` file inside the `src` directory. You should also have [set up the pico C SDK](https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf).
 
 ## Circuit
 
