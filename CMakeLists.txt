@@ -8,6 +8,11 @@ pico_sdk_init()
 
 add_executable(simon
     simon.c
+    simon_game.c
+    catch_game.c
+
+    game_settings.c
+    sequences.c
     util.c
     buzzer.c
     led.c
