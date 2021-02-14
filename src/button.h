@@ -31,7 +31,7 @@ inline void button_set_debounce_time(button* b, uint32_t ms) {
 
 bool button_get(button* b);
 
-bool button_prepare_for_loop(button* b);
+void button_prepare_for_loop(button* b);
 
 button_change_t button_change_steady(button* b);
 

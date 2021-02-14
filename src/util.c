@@ -32,6 +32,7 @@ uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_ma
             exit = true;
             pressed_button = n;
         }
+        sleep_ms(1);
     }
 
     for (int i = 0; i < n; ++i) {

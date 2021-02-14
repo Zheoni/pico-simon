@@ -54,15 +54,13 @@ static void cg_cpu_push_color(catch_game_t* game) {
 
 void cg_start(catch_game_t* game) {
     shw_t* shw = game->shw;
-    absolute_time_t last_push_tick = get_absolute_time(), current_tick;
+    absolute_time_t next_tick = make_timeout_time_us(game->delay);
     bool error = false;
 
     cg_cpu_push_color(game);
-
     while (!error) {
-        current_tick = get_absolute_time();
-        if (absolute_time_diff_us(last_push_tick, current_tick) >= game->delay) {
-            last_push_tick = current_tick;
+        if (time_reached(next_tick)) {
+            next_tick = make_timeout_time_us(game->delay);
 
             cg_cpu_push_color(game);
 

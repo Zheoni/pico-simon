@@ -50,9 +50,10 @@ static bool sg_guess_round(simon_game_t* game) {
     uint8_t color;
     bool guessed;
 
-    uint32_t time_limit, time_start;
+    uint32_t time_limit;
+    absolute_time_t timeout;
     switch (settings->difficulty) {
-        case EASY: time_limit = 60 * 1000 * 1000; // a minute...
+        case EASY: time_limit = SG_TIME_LIMIT_EASY;
         break;
         default:
         case NORMAL: time_limit = SG_TIME_LIMIT_NORMAL;
@@ -60,11 +61,10 @@ static bool sg_guess_round(simon_game_t* game) {
         case HARD: time_limit = SG_TIME_LIMIT_HARD;
         break;
     }
-    time_limit *= 1000; // to microseconds
     for (uint i = 0; i < game->n; ++i) {
         color = game->seq[i];
         guessed = false;
-        time_start = get_absolute_time();
+        timeout = make_timeout_time_ms(time_limit);
         while (!guessed) {
             for (int b = 0; b < N_COLORS; ++b) {
                 if (button_change_steady(&shw->buttons[b]) == BUTTON_PRESS) {
@@ -83,7 +83,7 @@ static bool sg_guess_round(simon_game_t* game) {
             }
             // timeout by time_limit, even if the user is correct but kept the
             // button pressed
-            if (absolute_time_diff_us(time_start, get_absolute_time()) > time_limit) {
+            if (time_reached(timeout)) {
                 return false;
             }
         }
@@ -119,7 +119,7 @@ bool sg_init(simon_game_t* game, game_settings_t* settings, shw_t* shw) {
     return true;
 }
 
-bool sg_deinit(simon_game_t* game) {
+void sg_deinit(simon_game_t* game) {
     free(game->seq);
 }
 

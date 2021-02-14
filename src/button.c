@@ -16,10 +16,10 @@ bool button_get(button* b) {
     return gpio_get(b->pin);
 }
 
-bool button_prepare_for_loop(button* b) {
+void button_prepare_for_loop(button* b) {
     b->last_state = gpio_get(b->pin);
     b->last_flicker = b->last_state;
-    b->timestamp = get_absolute_time();
+    b->timestamp = make_timeout_time_us(b->debounce_time);
 }
 
 button_change_t button_change_steady(button* b) {
@@ -30,11 +30,11 @@ button_change_t button_change_steady(button* b) {
     }
 
     if (current_state != b->last_flicker) {
-        b->timestamp = get_absolute_time();
+        b->timestamp = make_timeout_time_us(b->debounce_time);
         b->last_flicker = current_state;
     }
 
-    if (absolute_time_diff_us(b->timestamp, get_absolute_time()) > b->debounce_time) {
+    if (time_reached(b->timestamp)) {
         b->last_state = current_state;
         if (b->last_state == b->pressed_state) {
             return BUTTON_PRESS;
