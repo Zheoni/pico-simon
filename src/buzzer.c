@@ -24,7 +24,7 @@ sound buzzer_calc_sound(uint freq) {
     uint32_t div16_top = 16 * source_hz / freq;
     uint32_t top = 1;
     while (true) {
-        // try small prime factors to get clone to desired frequency
+        // try small prime factors to get close to desired frequency
 
         // the 16 are to keep the integer part of at least 1
         if (div16_top >= 16 * 5 && div16_top % 5 == 0 && top * 5 <= TOP_MAX) {

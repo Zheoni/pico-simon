@@ -15,7 +15,6 @@
 #include "simon_game.h"
 #include "catch_game.h"
 
-
 // The number of LEDs and BUTTONs must be the same!
 // Order is RED, BLUE, YELLOW, GREEN
 static const uint LED_PINS[N_COLORS]    = { 13, 12, 11, 10 };
@@ -37,13 +36,14 @@ sound COLOR_SOUNDS[] = {
 // END OF CONFIGURATION
 
 
-static void setup(simon_hardware_t* shw) {
+static bool setup(simon_hardware_t* shw) {
+    bool valid = true;
     for (int i = 0; i < N_COLORS; ++i) {
         // Init the LED pins and set them to be OUT pins
         led_init(LED_PINS[i], &shw->leds[i]);
 
         // Init the BUTTON pins, set them to be pulled down
-        button_init(BUTTON_PINS[i], BUTTON_PULL_DOWN, true, &shw->buttons[i]);
+        valid &= button_init(BUTTON_PINS[i], BUTTON_PULL_DOWN, true, &shw->buttons[i]);
     }
 
     // Init the buzzer
@@ -69,13 +69,15 @@ static void setup(simon_hardware_t* shw) {
         random = random + (0x00000001 & (*rnd_reg));
     }
     srand(random);
+
+    return valid;
 }
 
 
 int main() {
     simon_hardware_t shw;
 
-    setup(&shw);
+    if (!setup(&shw)) { return 1; }
 
     start_sequence(&shw);
 

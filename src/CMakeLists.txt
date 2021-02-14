@@ -19,11 +19,12 @@ add_executable(simon
     button.c
 )
 
-pico_add_extra_outputs(simon)
+pico_generate_pio_header(simon ${CMAKE_CURRENT_LIST_DIR}/button_debounce.pio)
 
-pico_enable_stdio_usb(simon 1)
+pico_add_extra_outputs(simon)
 
 target_link_libraries(simon
     pico_stdlib
     hardware_pwm
+    hardware_pio
 )

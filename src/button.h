@@ -1,15 +1,14 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "pico/time.h"
+#include "pico/types.h"
 
 typedef struct {
     uint pin;
-    absolute_time_t timestamp;
-    uint32_t debounce_time;
-    bool last_state;
-    bool last_flicker;
     bool pressed_state;
+    bool last_state;
+    uint pio_idx;
+    uint sm;
 } button;
 
 enum button_pull {
@@ -18,16 +17,16 @@ enum button_pull {
 };
 
 typedef enum {
-    BUTTON_NONE=0,
+    BUTTON_NONE,
     BUTTON_PRESS,
     BUTTON_RELEASE,
 } button_change_t;
 
-void button_init(uint button_pin, enum button_pull pull, bool pressed_state, button* b);
+bool button_init(uint button_pin, enum button_pull pull, bool pressed_state, button* b);
 
-inline void button_set_debounce_time(button* b, uint32_t ms) {
-    b->debounce_time = ms * 1000;
-}
+void button_deinit(button* b);
+
+bool button_set_debounce_time_us(button* b, uint32_t debounce_time_us);
 
 bool button_get(button* b);
 
