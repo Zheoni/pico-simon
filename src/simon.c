@@ -3,10 +3,10 @@
 #include "pico/divider.h"
 #include "pico/time.h"
 
-#include "buzzer.h"
-#include "led.h"
-#include "button.h"
-#include "util.h"
+#include "picoz/buzzer.h"
+#include "picoz/led.h"
+#include "picoz/button.h"
+#include "picoz/util.h"
 
 #include "simon_hardware.h"
 #include "sequences.h"

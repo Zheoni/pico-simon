@@ -1,6 +1,6 @@
 #include "game_settings.h"
 
-#include "util.h"
+#include "picoz/util.h"
 
 void settings_set_default(game_settings_t* s) {
     s->sound_enabled = true;

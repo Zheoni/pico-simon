@@ -1,9 +1,9 @@
 #ifndef SIMON_HARDWARE_H
 #define SIMON_HARDWARE_H
 
-#include "led.h"
-#include "button.h"
-#include "buzzer.h"
+#include "picoz/led.h"
+#include "picoz/button.h"
+#include "picoz/buzzer.h"
 #include "pico/types.h"
 
 // The number of colors (buttons and leds)
