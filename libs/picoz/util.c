@@ -25,6 +25,7 @@ uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_ma
             if (button_change_steady(&buttons[i]) == BUTTON_PRESS) {
                 exit = true;
                 pressed_button = i;
+                while (button_change_steady(&buttons[i]) != BUTTON_RELEASE);
                 break;
             }
         }

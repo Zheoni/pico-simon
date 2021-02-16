@@ -21,7 +21,10 @@ void led_enable_pwm(led* l) {
 
     gpio_set_function(l->pin, GPIO_FUNC_PWM);
     pwm_config config = pwm_get_default_config();
-    pwm_init(l->slice, &config, true);
+    // not initialise if its already done
+    if (!pwm_hw->slice[l->slice].csr) {
+        pwm_init(l->slice, &config, true);
+    }
     pwm_set_chan_level(l->slice, l->channel, cc);
 
     l->is_pwm_enabled = true;
