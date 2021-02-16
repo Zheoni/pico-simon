@@ -14,6 +14,7 @@
 
 #include "simon_game.h"
 #include "catch_game.h"
+#include "reflex_game.h"
 
 // The number of LEDs and BUTTONs must be the same!
 // Order is RED, BLUE, YELLOW, GREEN
@@ -59,6 +60,7 @@ static bool setup(simon_hardware_t* shw) {
     buzzer_calc_sound_sequence(VICTORY_SEQUENCE, VICTORY_SEQUENCE);
     buzzer_calc_sound_sequence(LOOSE_SEQUENCE, LOOSE_SEQUENCE);
     buzzer_calc_sound_sequence(READY_SEQUENCE, READY_SEQUENCE);
+    buzzer_calc_sound_sequence(PREPARE_SEQUENCE, PREPARE_SEQUENCE);
 
     // Set a random seed
     uint32_t random = 0;
@@ -108,7 +110,8 @@ int main() {
             }
             break;
             case 2: {
-                // other game
+                // wait for button release before starting this game
+                rg_start(&settings, &shw);
             }
             break;
             case 3: {

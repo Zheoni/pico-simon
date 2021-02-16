@@ -22,6 +22,17 @@ note READY_SEQUENCE[] = {
     BUZZER_END_SEQUENCE
 };
 
+note PREPARE_SEQUENCE[] = {
+    { 1760  ,   500 },
+    { 0     ,   50  },
+    { 1760  ,   500 },
+    { 0     ,   50  },
+    { 1760  ,   500 },
+    { 0     ,   50  },
+    { 3520  ,   500 },
+    BUZZER_END_SEQUENCE
+};
+
 void start_sequence(shw_t* shw) {
     for (int i = 0; i < 5; ++i) {
         for (int l = 0; l < N_COLORS; ++l) {
@@ -67,6 +78,21 @@ void ready_sequence(shw_t* shw, bool sound_enabled, bool leds_enabled) {
         for (int i = 0; i < N_COLORS; ++i) led_on(&shw->leds[i]);
         sleep_ms(75);
         for (int i = 0; i < N_COLORS; ++i) led_off(&shw->leds[i]);
+    }
+    buzzer_block_until_sequences_finish();
+}
+
+void prepare_sequence(shw_t* shw, bool sound_enabled, bool leds_enabled) {
+    if (sound_enabled)
+        buzzer_play_sound_sequence_non_blocking(shw->buzzer, PREPARE_SEQUENCE);
+    if (leds_enabled) {
+        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 255);
+        sleep_ms(550);
+        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 192);
+        sleep_ms(550);
+        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 128);
+        sleep_ms(550);
+        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 64);
     }
     buzzer_block_until_sequences_finish();
 }

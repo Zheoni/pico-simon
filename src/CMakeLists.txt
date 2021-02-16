@@ -6,6 +6,7 @@ add_executable(simon
     simon.c
     simon_game.c
     catch_game.c
+    reflex_game.c
 
     game_settings.c
     sequences.c
