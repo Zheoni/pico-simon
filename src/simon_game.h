@@ -4,12 +4,12 @@
 #include "game_settings.h"
 #include "simon_hardware.h"
 
-#define SG_MAX_DELAY 800
-#define SG_MIN_DELAY 300
+#define SG_MAX_DELAY                 800
+#define SG_MIN_DELAY                 300
 #define SG_DELAY_REDUCTION_PER_ROUND 40
-#define SG_TIME_LIMIT_EASY 60000
-#define SG_TIME_LIMIT_NORMAL 10000
-#define SG_TIME_LIMIT_HARD 4000
+#define SG_TIME_LIMIT_EASY           60000
+#define SG_TIME_LIMIT_NORMAL         10000
+#define SG_TIME_LIMIT_HARD           4000
 
 #define ALLOC_BASE_SIZE 16
 

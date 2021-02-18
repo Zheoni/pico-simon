@@ -22,22 +22,27 @@ static void sg_display_seq(simon_game_t* game) {
 
     for (uint i = 0; i < game->n; ++i) {
         color = game->seq[i];
-        if (settings->leds_enabled) led_on(&shw->leds[color]);
+        if (settings->leds_enabled)
+            led_on(&shw->leds[color]);
         if (settings->sound_enabled) {
             buzzer_play_sound(shw->buzzer, COLOR_SOUNDS[color]);
             sleep_ms(100);
             buzzer_stop_sound(shw->buzzer);
         }
         sleep_ms(200 + 100 * !settings->sound_enabled);
-        if (settings->leds_enabled) led_off(&shw->leds[color]);
+        if (settings->leds_enabled)
+            led_off(&shw->leds[color]);
 
         switch (settings->difficulty) {
-            case EASY: delay = SG_MAX_DELAY;
+        case EASY:
+            delay = SG_MAX_DELAY;
             break;
-            default:
-            case NORMAL: delay = calc_linear_delay(game->n - i - 1);
+        default:
+        case NORMAL:
+            delay = calc_linear_delay(game->n - i - 1);
             break;
-            case HARD: delay = calc_linear_delay(game->n - i - 1) >> 1;
+        case HARD:
+            delay = calc_linear_delay(game->n - i - 1) >> 1;
             break;
         }
         sleep_ms(delay);
@@ -53,12 +58,15 @@ static bool sg_guess_round(simon_game_t* game) {
     uint32_t time_limit;
     absolute_time_t timeout;
     switch (settings->difficulty) {
-        case EASY: time_limit = SG_TIME_LIMIT_EASY;
+    case EASY:
+        time_limit = SG_TIME_LIMIT_EASY;
         break;
-        default:
-        case NORMAL: time_limit = SG_TIME_LIMIT_NORMAL;
+    default:
+    case NORMAL:
+        time_limit = SG_TIME_LIMIT_NORMAL;
         break;
-        case HARD: time_limit = SG_TIME_LIMIT_HARD;
+    case HARD:
+        time_limit = SG_TIME_LIMIT_HARD;
         break;
     }
     for (uint i = 0; i < game->n; ++i) {
@@ -69,11 +77,17 @@ static bool sg_guess_round(simon_game_t* game) {
             for (int b = 0; b < N_COLORS; ++b) {
                 if (button_change_steady(&shw->buttons[b]) == BUTTON_PRESS) {
                     if (b == color) {
-                        if (settings->sound_enabled) buzzer_play_sound(shw->buzzer, COLOR_SOUNDS[color]);
-                        if (settings->leds_enabled) led_on(&shw->leds[b]);
-                        while (button_change_steady(&shw->buttons[b]) != BUTTON_RELEASE);
-                        if (settings->sound_enabled) buzzer_stop_sound(shw->buzzer);
-                        if (settings->leds_enabled) led_off(&shw->leds[b]);
+                        if (settings->sound_enabled)
+                            buzzer_play_sound(shw->buzzer, COLOR_SOUNDS[color]);
+                        if (settings->leds_enabled)
+                            led_on(&shw->leds[b]);
+                        while (button_change_steady(&shw->buttons[b]) !=
+                               BUTTON_RELEASE)
+                            ;
+                        if (settings->sound_enabled)
+                            buzzer_stop_sound(shw->buzzer);
+                        if (settings->leds_enabled)
+                            led_off(&shw->leds[b]);
                         guessed = true;
                         break;
                     } else {
@@ -92,14 +106,15 @@ static bool sg_guess_round(simon_game_t* game) {
 }
 
 /**
-* Adds a color to the sequence. Returns false when cannot allocate
-*/
+ * Adds a color to the sequence. Returns false when cannot allocate
+ */
 static bool sg_next_round(simon_game_t* game) {
     if (game->n >= game->size) {
         // allocate more space
         game->size = game->size << 1; // duplicate the space
         game->seq = (uint8_t*) realloc(game->seq, game->size * sizeof(uint8_t));
-        if (game->seq == NULL) return false;
+        if (game->seq == NULL)
+            return false;
     }
     uint8_t next_color = rand() % N_COLORS;
     game->seq[game->n++] = next_color;
@@ -107,12 +122,13 @@ static bool sg_next_round(simon_game_t* game) {
 }
 
 /**
-* Initializes the game. Returns false when cannot allocate
-*/
+ * Initializes the game. Returns false when cannot allocate
+ */
 bool sg_init(simon_game_t* game, game_settings_t* settings, shw_t* shw) {
     game->n = 0;
     game->seq = (uint8_t*) malloc(ALLOC_BASE_SIZE * sizeof(uint8_t));
-    if (game->seq == NULL) return false;
+    if (game->seq == NULL)
+        return false;
     game->size = ALLOC_BASE_SIZE;
     game->settings = settings;
     game->shw = shw;
@@ -138,10 +154,12 @@ void sg_start(simon_game_t* game) {
         correct = sg_guess_round(game);
         if (correct) {
             sleep_ms(300);
-            victory_sequence(shw, settings->sound_enabled, settings->leds_enabled);
+            victory_sequence(shw, settings->sound_enabled,
+                             settings->leds_enabled);
             sleep_ms(1500);
         } else {
-            loose_sequence(shw, settings->sound_enabled, settings->leds_enabled);
+            loose_sequence(shw, settings->sound_enabled,
+                           settings->leds_enabled);
             break;
         }
     }

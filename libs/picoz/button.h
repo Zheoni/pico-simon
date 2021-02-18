@@ -22,7 +22,8 @@ typedef enum {
     BUTTON_RELEASE,
 } button_change_t;
 
-bool button_init(uint button_pin, enum button_pull pull, bool pressed_state, button* b);
+bool button_init(uint button_pin, enum button_pull pull, bool pressed_state,
+                 button* b);
 
 void button_deinit(button* b);
 

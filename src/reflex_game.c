@@ -36,7 +36,8 @@ static void _button_handler(uint gpio, uint32_t events) {
 }
 
 static int64_t _trigger(alarm_id_t id, void* user_data) {
-    if (winner_pin != -1) return 0;
+    if (winner_pin != -1)
+        return 0;
 
     struct game_data* data = (struct game_data*) user_data;
 
@@ -51,14 +52,16 @@ static int64_t _trigger(alarm_id_t id, void* user_data) {
     }
 
     if (data->settings->sound_enabled) {
-        buzzer_play_sound_sequence_non_blocking(data->shw->buzzer, READY_SEQUENCE);
+        buzzer_play_sound_sequence_non_blocking(data->shw->buzzer,
+                                                READY_SEQUENCE);
     }
 
     return 0;
 }
 
 static int64_t _taunts(alarm_id_t id, void* user_data) {
-    if (winner_pin != -1) return 0;
+    if (winner_pin != -1)
+        return 0;
 
     struct game_data* data = (struct game_data*) user_data;
 
@@ -75,14 +78,14 @@ static int64_t _taunts(alarm_id_t id, void* user_data) {
     }
 
     // repeat again in between 750 and 1500 milliseconds
-    return - (rand() % 500000 + 750000);
+    return -(rand() % 500000 + 750000);
 }
 
 /**
-* Starts the reflex game.
-* IMPORTANT:
-* ! MAKE SURE TO **NOT** CALL THIS FUNCTION AGAIN UNTIL IT FINISHES!!!
-*/
+ * Starts the reflex game.
+ * IMPORTANT:
+ * ! MAKE SURE TO **NOT** CALL THIS FUNCTION AGAIN UNTIL IT FINISHES!!!
+ */
 void rg_start(game_settings_t* settings, shw_t* shw) {
     button_pins = 0;
     winner_pin = -1;
@@ -101,12 +104,15 @@ void rg_start(game_settings_t* settings, shw_t* shw) {
     uint32_t min = RG_MIN_TRIGGER_DELAY;
     uint32_t max;
     switch (settings->difficulty) {
-        case EASY: max = RG_MAX_EASY_TRIGGER_DELAY;
+    case EASY:
+        max = RG_MAX_EASY_TRIGGER_DELAY;
         break;
-        default:
-        case NORMAL: max = RG_MAX_NORMAL_TRIGGER_DELAY;
+    default:
+    case NORMAL:
+        max = RG_MAX_NORMAL_TRIGGER_DELAY;
         break;
-        case HARD: max = RG_MAX_HARD_TRIGGER_DELAY;
+    case HARD:
+        max = RG_MAX_HARD_TRIGGER_DELAY;
         break;
     }
     uint32_t delay_ms = rand() % (max - min) + min;
@@ -122,14 +128,13 @@ void rg_start(game_settings_t* settings, shw_t* shw) {
     absolute_time_t start_time = get_absolute_time();
 
     for (int i = 0; i < N_COLORS; ++i) {
-        gpio_set_irq_enabled_with_callback(shw->buttons[i].pin,
-            GPIO_IRQ_EDGE_RISE | GPIO_IRQ_LEVEL_HIGH,
-            true,
-            &_button_handler
-        );
+        gpio_set_irq_enabled_with_callback(
+            shw->buttons[i].pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_LEVEL_HIGH, true,
+            &_button_handler);
     }
 
-    while (winner_pin == -1 && !time_reached(timeout));
+    while (winner_pin == -1 && !time_reached(timeout))
+        ;
 
     if (winner_pin == -1) {
         // if the exit condition was the timeout, cancel the alarms
@@ -142,7 +147,8 @@ void rg_start(game_settings_t* settings, shw_t* shw) {
     }
 
     // if the press was before the alarm or there was no press
-    if (absolute_time_diff_us(start_time, press_time) < delay_ms * 1000 || winner_pin == -1) {
+    if (absolute_time_diff_us(start_time, press_time) < delay_ms * 1000 ||
+        winner_pin == -1) {
         for (int i = 0; i < N_COLORS; ++i) {
             led_disable_pwm(&shw->leds[i]);
         }
@@ -158,7 +164,8 @@ void rg_start(game_settings_t* settings, shw_t* shw) {
 
         // Show the winner
         if (settings->sound_enabled)
-            buzzer_play_sound_sequence_non_blocking(shw->buzzer, VICTORY_SEQUENCE);
+            buzzer_play_sound_sequence_non_blocking(shw->buzzer,
+                                                    VICTORY_SEQUENCE);
         led_start_pulsating(&shw->leds[winner], 1);
         sleep_ms(2000);
         led_stop_pulsating(&shw->leds[winner]);

@@ -14,7 +14,8 @@ void led_init(uint led_pin, led* l) {
 }
 
 void led_enable_pwm(led* l) {
-    if (l->is_pwm_enabled) return;
+    if (l->is_pwm_enabled)
+        return;
 
     bool current_state = gpio_get(l->pin);
     uint16_t cc = current_state ? 0xFFFE : 0x0000;
@@ -31,14 +32,17 @@ void led_enable_pwm(led* l) {
 }
 
 void led_disable_pwm(led* l) {
-    if (!l->is_pwm_enabled) return;
+    if (!l->is_pwm_enabled)
+        return;
 
     uint16_t cc = pwm_hw->slice[l->slice].cc;
     cc = (cc >> (l->channel ? PWM_CH0_CC_B_LSB : PWM_CH0_CC_A_LSB)) & 0xFFFF;
     bool state = cc > 0;
 
     uint cc_other = pwm_hw->slice[l->slice].cc;
-    cc_other = (cc_other >> (l->channel ? PWM_CH0_CC_A_LSB : PWM_CH0_CC_B_LSB)) & 0xFFFF;
+    cc_other =
+        (cc_other >> (l->channel ? PWM_CH0_CC_A_LSB : PWM_CH0_CC_B_LSB)) &
+        0xFFFF;
     if (cc_other == 0) {
         pwm_set_enabled(l->slice, false);
     }
@@ -50,14 +54,16 @@ void led_disable_pwm(led* l) {
 }
 
 void led_put(led* l, bool value) {
-    if (l->is_pwm_enabled) return;
+    if (l->is_pwm_enabled)
+        return;
     gpio_put(l->pin, value);
 }
 
 void led_toggle(led* l) {
     if (l->is_pwm_enabled) {
         uint16_t cc = pwm_hw->slice[l->slice].cc;
-        cc = (cc >> (l->channel ? PWM_CH0_CC_B_LSB : PWM_CH0_CC_A_LSB)) & 0xFFFF;
+        cc =
+            (cc >> (l->channel ? PWM_CH0_CC_B_LSB : PWM_CH0_CC_A_LSB)) & 0xFFFF;
         pwm_set_chan_level(l->slice, l->channel, !cc);
     } else {
         gpio_put(l->pin, !gpio_get(l->pin));
@@ -81,7 +87,8 @@ void led_off(led* l) {
 }
 
 void led_level(led* l, uint8_t level) {
-    if (!l->is_pwm_enabled) return;
+    if (!l->is_pwm_enabled)
+        return;
     pwm_set_chan_level(l->slice, l->channel, level * level);
 }
 
@@ -102,15 +109,18 @@ static bool _led_pulsating_callback(repeating_timer_t* rt) {
 }
 
 bool led_start_pulsating(led* l, int32_t delay_ms) {
-    if (!l->is_pwm_enabled) return false;
+    if (!l->is_pwm_enabled)
+        return false;
 
     l->intensity = 0;
     l->direction = 1;
-    return add_repeating_timer_ms(delay_ms, _led_pulsating_callback, (void*) l, &l->timer);
+    return add_repeating_timer_ms(delay_ms, _led_pulsating_callback, (void*) l,
+                                  &l->timer);
 }
 
 bool led_stop_pulsating(led* l) {
-    if (!l->is_pwm_enabled) return false;
+    if (!l->is_pwm_enabled)
+        return false;
 
     return cancel_repeating_timer(&l->timer);
 }

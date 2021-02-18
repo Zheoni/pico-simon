@@ -7,17 +7,17 @@ extern sound COLOR_SOUNDS[];
 
 bool cg_init(catch_game_t* game, game_settings_t* settings, shw_t* shw) {
     switch (settings->difficulty) {
-        case EASY:
+    case EASY:
         game->delay = CG_EASY_BASE_DELAY;
         game->delay_reduction = CG_EASY_DELAY_REDUCTION;
         game->size = CG_EASY_LIMIT;
         break;
-        case NORMAL:
+    case NORMAL:
         game->delay = CG_NORMAL_BASE_DELAY;
         game->delay_reduction = CG_NORMAL_DELAY_REDUCTION;
         game->size = CG_NORMAL_LIMIT;
         break;
-        case HARD:
+    case HARD:
         game->delay = CG_HARD_BASE_DELAY;
         game->delay_reduction = CG_HARD_DELAY_REDUCTION;
         game->size = CG_HARD_LIMIT;
@@ -27,7 +27,8 @@ bool cg_init(catch_game_t* game, game_settings_t* settings, shw_t* shw) {
     game->delay_reduction *= 1000;
     game->size += 1;
     game->seq = (int8_t*) malloc(game->size * sizeof(int8_t));
-    if (game->seq == 0) return false; // cannot alloc
+    if (game->seq == 0)
+        return false; // cannot alloc
     game->usr_pos = 0;
     game->cpu_pos = game->size - 1;
     game->settings = settings;
@@ -45,11 +46,15 @@ static void cg_cpu_push_color(catch_game_t* game) {
     game->cpu_pos = (game->cpu_pos + 1) % game->size;
     game->seq[game->cpu_pos] = color;
 
-    if (game->settings->leds_enabled) led_on(&shw->leds[color]);
-    if (game->settings->sound_enabled) buzzer_play_sound(shw->buzzer, COLOR_SOUNDS[color]);
+    if (game->settings->leds_enabled)
+        led_on(&shw->leds[color]);
+    if (game->settings->sound_enabled)
+        buzzer_play_sound(shw->buzzer, COLOR_SOUNDS[color]);
     sleep_ms(75);
-    if (game->settings->leds_enabled) led_off(&shw->leds[color]);
-    if (game->settings->sound_enabled) buzzer_stop_sound(shw->buzzer);
+    if (game->settings->leds_enabled)
+        led_off(&shw->leds[color]);
+    if (game->settings->sound_enabled)
+        buzzer_stop_sound(shw->buzzer);
 }
 
 void cg_start(catch_game_t* game) {
@@ -96,5 +101,6 @@ void cg_start(catch_game_t* game) {
             }
         }
     }
-    loose_sequence(shw, game->settings->sound_enabled, game->settings->leds_enabled);
+    loose_sequence(shw, game->settings->sound_enabled,
+                   game->settings->leds_enabled);
 }

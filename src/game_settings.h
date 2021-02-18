@@ -3,13 +3,9 @@
 
 #include "simon_hardware.h"
 
-enum difficulty_t {
-    EASY=0,
-    NORMAL,
-    HARD
-};
+enum difficulty_t { EASY = 0, NORMAL, HARD };
 
-typedef struct  {
+typedef struct {
     bool sound_enabled;
     bool leds_enabled;
     enum difficulty_t difficulty;

@@ -1,7 +1,10 @@
 #include "util.h"
 #include "pico/time.h"
 
-uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_mask, uint32_t delay_ms, led* leds, button* buttons, uint n, uint32_t timeout_ms) {
+uint wait_button_push_detailed(uint16_t on_leds_mask,
+                               uint16_t pulsating_leds_mask, uint32_t delay_ms,
+                               led* leds, button* buttons, uint n,
+                               uint32_t timeout_ms) {
     uint16_t led_bit;
     for (int i = 0; i < n; ++i) {
         led_bit = (1 << i);
@@ -25,7 +28,8 @@ uint wait_button_push_detailed(uint16_t on_leds_mask, uint16_t pulsating_leds_ma
             if (button_change_steady(&buttons[i]) == BUTTON_PRESS) {
                 exit = true;
                 pressed_button = i;
-                while (button_change_steady(&buttons[i]) != BUTTON_RELEASE);
+                while (button_change_steady(&buttons[i]) != BUTTON_RELEASE)
+                    ;
                 break;
             }
         }

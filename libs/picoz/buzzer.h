@@ -10,7 +10,8 @@ typedef struct {
     uint32_t d;
 } note;
 
-#define BUZZER_END_SEQUENCE { 0, 0 }
+#define BUZZER_END_SEQUENCE                                                    \
+    { 0, 0 }
 
 // Calc a sound from a frequency.
 // When return 0, ERROR.
@@ -26,6 +27,5 @@ void buzzer_calc_sound_sequence(note* notes_src, note* notes_dest);
 void buzzer_play_sound_sequence(uint buzzer_pin, note* notes);
 bool buzzer_play_sound_sequence_non_blocking(uint buzzer_pin, note* notes);
 void buzzer_block_until_sequences_finish();
-
 
 #endif /* end of include guard: BUZZER_H */

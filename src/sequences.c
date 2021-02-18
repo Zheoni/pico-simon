@@ -1,6 +1,6 @@
 #include "sequences.h"
 
-
+// clang-format off
 // freq , delay
 note VICTORY_SEQUENCE[] = {
     { 660   ,   150 },
@@ -32,6 +32,7 @@ note PREPARE_SEQUENCE[] = {
     { 3520  ,   500 },
     BUZZER_END_SEQUENCE
 };
+// clang-format on
 
 void start_sequence(shw_t* shw) {
     for (int i = 0; i < 5; ++i) {
@@ -75,9 +76,11 @@ void ready_sequence(shw_t* shw, bool sound_enabled, bool leds_enabled) {
     if (sound_enabled)
         buzzer_play_sound_sequence_non_blocking(shw->buzzer, READY_SEQUENCE);
     if (leds_enabled) {
-        for (int i = 0; i < N_COLORS; ++i) led_on(&shw->leds[i]);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_on(&shw->leds[i]);
         sleep_ms(75);
-        for (int i = 0; i < N_COLORS; ++i) led_off(&shw->leds[i]);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_off(&shw->leds[i]);
     }
     buzzer_block_until_sequences_finish();
 }
@@ -86,13 +89,17 @@ void prepare_sequence(shw_t* shw, bool sound_enabled, bool leds_enabled) {
     if (sound_enabled)
         buzzer_play_sound_sequence_non_blocking(shw->buzzer, PREPARE_SEQUENCE);
     if (leds_enabled) {
-        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 255);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_level(&shw->leds[i], 255);
         sleep_ms(550);
-        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 192);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_level(&shw->leds[i], 192);
         sleep_ms(550);
-        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 128);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_level(&shw->leds[i], 128);
         sleep_ms(550);
-        for (int i = 0; i < N_COLORS; ++i) led_level(&shw->leds[i], 64);
+        for (int i = 0; i < N_COLORS; ++i)
+            led_level(&shw->leds[i], 64);
     }
     buzzer_block_until_sequences_finish();
 }

@@ -1,8 +1,8 @@
 #ifndef LED_H
 #define LED_H
 
-#include "pico/types.h"
 #include "pico/time.h"
+#include "pico/types.h"
 
 typedef struct {
     uint pin;
